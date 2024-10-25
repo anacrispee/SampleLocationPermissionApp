@@ -58,20 +58,17 @@ fun LocationScreen(
     val context = LocalContext.current
     var location by remember { mutableStateOf("") }
 
-    // Create a permission launcher
+    /**
+     * Instanciando um lançador
+     *
+     * rememberLauncherForActivityResult: é uma função que cria um lançador de resultados de atividade
+     * que pode ser usado para solicitar permissões ou iniciar outras atividades que retornam um resultado
+     */
     val requestPermissionLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
-            onResult = { isGranted ->
-                if (isGranted) {
-                    Toast.makeText(context, "Permissão concedida", Toast.LENGTH_SHORT).show()
-
-                    // Permission granted, update the location
-                    getCurrentLocation(context) { lat, long ->
-                        location = "Latitude: $lat, Longitude: $long"
-                    }
-                }
-            })
+            onResult = {}
+        )
 
     Column(
         modifier = Modifier
@@ -87,14 +84,15 @@ fun LocationScreen(
                 if (hasLocationPermission(context)) {
                     Toast.makeText(context, "Permissão já concedida", Toast.LENGTH_SHORT).show()
 
-                    // Permission already granted, update the location
                     getCurrentLocation(context) { lat, long ->
                         location = "Latitude: $lat, Longitude: $long"
                     }
                 } else {
                     Toast.makeText(context, "Permissão não concedida", Toast.LENGTH_SHORT).show()
 
-                    // Request location permission
+                    /**
+                     * Exibe um dialog/prompt para o usuário conceder a permissão
+                     */
                     requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
                 }
             }
@@ -128,19 +126,32 @@ private fun hasLocationPermission(context: Context): Boolean {
     ) == PackageManager.PERMISSION_GRANTED
 }
 
+/**
+ * Função que obtém a localização atual do usuário
+ *
+ * A instância location armazena a localização atual do usuário, que é obtida por meio do LocationServices
+ * O FusedLocationProviderClient é uma API do Google Play Services que fornece a localização do dispositivo.
+ */
 private fun getCurrentLocation(context: Context, callback: (Double, Double) -> Unit) {
-    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+    val location = LocationServices.getFusedLocationProviderClient(context)
 
+    /**
+     * Verifica se a permissão do tipo ACCESS_FINE_LOCATION é igual a PERMISSION_GRANTED,
+     * ou seja, se ela foi concedida.
+     */
     if (ContextCompat.checkSelfPermission(
             context,
             android.Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
     ) {
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    val lat = location.latitude
-                    val long = location.longitude
+        location.lastLocation
+            .addOnSuccessListener {
+                /**
+                 * Caso sucesso, retorna a latitude e longitude no callback.
+                 */
+                if (it != null) {
+                    val lat = it.latitude
+                    val long = it.longitude
                     callback(lat, long)
                 }
             }
