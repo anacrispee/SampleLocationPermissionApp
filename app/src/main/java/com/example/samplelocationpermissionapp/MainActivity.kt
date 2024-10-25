@@ -119,6 +119,10 @@ fun LocationScreen(
     }
 }
 
+/**
+ * Verifica se a permissão do tipo ACCESS_FINE_LOCATION é igual a PERMISSION_GRANTED,
+ * ou seja, se ela foi concedida.
+ */
 private fun hasLocationPermission(context: Context): Boolean {
     return ContextCompat.checkSelfPermission(
         context,
@@ -128,11 +132,12 @@ private fun hasLocationPermission(context: Context): Boolean {
 
 /**
  * Função que obtém a localização atual do usuário
- *
- * A instância location armazena a localização atual do usuário, que é obtida por meio do LocationServices
- * O FusedLocationProviderClient é uma API do Google Play Services que fornece a localização do dispositivo.
  */
 private fun getCurrentLocation(context: Context, callback: (Double, Double) -> Unit) {
+    /**
+     *  * A instância location armazena a localização atual do usuário, que é obtida por meio do LocationServices
+     *  * O FusedLocationProviderClient é uma API do Google Play Services que fornece a localização do dispositivo.
+     */
     val location = LocationServices.getFusedLocationProviderClient(context)
 
     /**
